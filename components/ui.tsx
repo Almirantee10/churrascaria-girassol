@@ -131,10 +131,11 @@ export function Field({ label, icon, multiline, ...rest }: { label?: string; ico
   );
 }
 
-export function OptionRow({ type, checked, disabled, label, description, meta, onChange }: { type: "radio" | "checkbox"; checked: boolean; disabled?: boolean; label: string; description?: string; meta?: string; onChange: () => void }) {
+export function OptionRow({ type, checked, disabled, label, description, meta, img, onChange }: { type: "radio" | "checkbox"; checked: boolean; disabled?: boolean; label: string; description?: string; meta?: string; img?: string; onChange: () => void }) {
   return (
     <button type="button" className={`opt${checked ? " on" : ""}`} disabled={disabled} onClick={onChange} role={type} aria-checked={checked}>
       <span className={`opt-mark opt-${type}`}>{checked ? <i /> : null}</span>
+      {img ? <span className="opt-img" style={{ backgroundImage: `url('${img}')` }} /> : null}
       <span className="opt-txt"><b>{label}</b>{description ? <small>{description}</small> : null}</span>
       {meta ? <span className="opt-meta">{meta}</span> : null}
     </button>

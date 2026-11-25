@@ -1,24 +1,24 @@
 {
-  "_ajuda": "ARQUIVO DE CONFIGURAÇÃO DO CARDÁPIO. Para mudar preço ou opções, edite só os textos abaixo (sem mexer em código). 'preco' = valor fixo da marmita. Em cada categoria: 'min' = mínimo que o cliente precisa escolher (0 = opcional), 'max' = máximo permitido, 'opcoes' = lista de itens disponíveis. Para tirar um item do dia, apague a linha dele; para incluir, adicione uma linha com aspas e vírgula.",
+  "_ajuda": "Cardápio inicial. Depois de publicado, o dono altera tudo pela Área Restrita (/admin), sem mexer neste arquivo. 'min' = mínimo de escolhas (0 = opcional), 'max' = máximo.",
   "preco": 25,
   "categorias": [
     {
       "id": "carne",
       "label": "Carne",
       "titulo": "Opção de carne",
-      "dica": "Escolha a carne da sua marmita",
+      "dica": "Escolha 1 ou combine até 2 carnes diferentes",
       "min": 1,
-      "max": 1,
+      "max": 2,
       "opcoes": ["Frango frito", "Frango ao molho", "Feijoada", "Buchada", "Linguiça"]
     },
     {
-      "id": "salada",
-      "label": "Salada",
-      "titulo": "Opção de salada",
-      "dica": "Escolha até 3 saladas (ou nenhuma)",
+      "id": "farofa",
+      "label": "Farofa",
+      "titulo": "Farofa",
+      "dica": "Escolha 1 opção, ou nenhuma se preferir",
       "min": 0,
-      "max": 3,
-      "opcoes": ["Maionese", "Beterraba", "Repolho", "Pepino com tomate", "Alface com tomate", "Rúcula", "Couve", "Quiabo"]
+      "max": 1,
+      "opcoes": ["Farofa", "Feijão tropeiro"]
     },
     {
       "id": "acompanhamento",
@@ -27,7 +27,16 @@
       "dica": "Escolha até 3 acompanhamentos",
       "min": 1,
       "max": 3,
-      "opcoes": ["Arroz", "Feijão", "Macarrão", "Farofa", "Feijão tropeiro"]
+      "opcoes": ["Arroz", "Feijão", "Macarrão"]
+    },
+    {
+      "id": "salada",
+      "label": "Salada",
+      "titulo": "Opção de salada",
+      "dica": "Escolha as saladas que quiser (ou nenhuma)",
+      "min": 0,
+      "max": 8,
+      "opcoes": ["Maionese", "Beterraba", "Repolho", "Pepino com tomate", "Alface com tomate", "Rúcula", "Couve", "Quiabo"]
     }
   ]
 }

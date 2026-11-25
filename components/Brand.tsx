@@ -1,3 +1,5 @@
+"use client";
+import { useCatalog } from "./Catalog";
 export function WhatsAppIcon({ size = 22, color = "currentColor" }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill={color} aria-hidden>
@@ -18,5 +20,7 @@ export function InstagramIcon({ size = 22, color = "currentColor" }: { size?: nu
 
 /* eslint-disable @next/next/no-img-element */
 export function Logo({ height = 44 }: { height?: number }) {
-  return <img src="/assets/logo/logo-full.png" alt="Churrascaria Girassol" style={{ height, width: "auto", display: "block", borderRadius: "50%" }} />;
+  const { cat } = useCatalog();
+  const src = cat.loja.logo || "/assets/logo/logo-full.png";
+  return <img src={src} alt={cat.loja.nome} style={{ height, width: "auto", display: "block", borderRadius: "50%" }} />;
 }

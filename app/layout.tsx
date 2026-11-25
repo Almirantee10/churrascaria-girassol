@@ -2,7 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Montserrat, Playfair_Display, Poppins } from "next/font/google";
 import "./globals.css";
 import { StoreProvider } from "@/components/Store";
-import { Balloons, CartBar, Footer, Header, SentSheet, Toast } from "@/components/Chrome";
+import { CatalogProvider } from "@/components/Catalog";
+import { Balloons, CartBar, SentSheet, Toast } from "@/components/Chrome";
+import { Shell } from "@/components/Shell";
 
 const serif = Playfair_Display({ subsets: ["latin"], weight: ["600", "700", "800"], variable: "--f-serif", display: "swap" });
 const display = Montserrat({ subsets: ["latin"], weight: ["500", "600", "700", "800", "900"], variable: "--f-display", display: "swap" });
@@ -20,17 +22,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pt-BR" className={`${serif.variable} ${display.variable} ${body.variable}`}>
       <body>
         <noscript><style>{`[data-stagger]>*{opacity:1!important}`}</style></noscript>
+        <CatalogProvider>
         <StoreProvider>
-          <div className="shell">
-            <Header />
-            <main>{children}</main>
-            <Footer />
-          </div>
+          <Shell>{children}</Shell>
           <CartBar />
           <Toast />
           <SentSheet />
           <Balloons />
         </StoreProvider>
+        </CatalogProvider>
       </body>
     </html>
   );

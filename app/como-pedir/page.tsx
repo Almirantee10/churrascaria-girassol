@@ -2,7 +2,8 @@
 
 import { useRef, useState } from "react";
 import { CalendarCheck, ChevronDown, ListChecks, MapPin, MessageCircle } from "lucide-react";
-import { ADDRESS, MAPS_URL, PRICE, WA_LABEL, fmt, waUrl } from "@/lib/data";
+import { fmt, waUrl } from "@/lib/data";
+import { useCatalog } from "@/components/Catalog";
 import { gsap, useGSAP, noMotion } from "@/lib/gsap";
 import { Reveal, SplitWords, Stagger } from "@/components/Motion";
 import { Button, SectionHeading } from "@/components/ui";
@@ -13,15 +14,18 @@ const steps = [
   { n: 2, Icon: MessageCircle, title: "Envie pelo WhatsApp", text: "Escolha retirada ou entrega e a forma de pagamento. O pedido chega organizado no nosso WhatsApp." },
   { n: 3, Icon: CalendarCheck, title: "Retire ou receba", text: "Confirmamos o seu pedido e combinamos a retirada ou a entrega." },
 ];
-const faq = [
-  { q: "Quanto custa a marmita?", a: `Cada marmita custa ${fmt(PRICE)}, independentemente das escolhas. O preço não muda conforme a carne, a salada ou os acompanhamentos.` },
+const makeFaq = (preco: number, entrega: boolean, retirada: boolean) => [
+  { q: "Quanto custa a marmita?", a: `Cada marmita custa ${fmt(preco)}. Alguns itens ou adicionais podem ter valor extra, sempre indicado ao lado da opção, e o total aparece antes de você enviar o pedido.` },
   { q: "Posso pedir mais de uma marmita?", a: "Pode. Monte cada marmita individualmente, com combinações diferentes, ou use o botão Repetir no pedido para copiar uma marmita." },
   { q: "Posso mudar minha escolha antes de finalizar?", a: "Pode. No resumo da marmita, e também no pedido, toque em Alterar para mudar qualquer item antes de enviar." },
-  { q: "Vocês entregam?", a: "Você escolhe retirada ou entrega ao finalizar o pedido. A taxa de entrega, se houver, é combinada pelo WhatsApp." },
+  { q: "Vocês entregam?", a: entrega && retirada ? "Você escolhe retirada ou entrega ao finalizar o pedido. A taxa de entrega, se houver, aparece no resumo do pedido." : entrega ? "Sim, fazemos entrega. A taxa, se houver, aparece no resumo do pedido." : "No momento atendemos só com retirada no local." },
   { q: "Quais são as formas de pagamento?", a: "Pix, cartão de crédito, cartão de débito ou dinheiro. Você escolhe ao finalizar o pedido." },
 ];
 
 export default function ComoPedir() {
+  const { cat } = useCatalog();
+  const L = cat.loja;
+  const faq = makeFaq(L.preco, L.entrega, L.retirada);
   const [open, setOpen] = useState(0);
   const root = useRef<HTMLDivElement>(null);
   const { contextSafe } = useGSAP({ scope: root });
@@ -80,14 +84,15 @@ export default function ComoPedir() {
           <div className="contact">
             <WhatsAppIcon size={28} color="var(--sds-whatsapp)" />
             <div className="lbl" style={{ letterSpacing: ".18em" }}>WhatsApp</div>
-            <div className="v">{WA_LABEL}</div>
-            <Button variant="outline" size="sm" href={waUrl("Olá! Gostaria de fazer um pedido.")} external>Chamar no WhatsApp</Button>
+            <div className="v">{L.telefone}</div>
+            <Button variant="outline" size="sm" href={waUrl(L.whatsapp, "Olá! Gostaria de fazer um pedido.")} external>Chamar no WhatsApp</Button>
           </div>
           <div className="contact">
             <MapPin size={28} color="var(--sds-gold-400)" />
             <div className="lbl" style={{ letterSpacing: ".18em" }}>Onde estamos</div>
-            <div className="v" style={{ fontSize: 20 }}>{ADDRESS}</div>
-            <Button variant="outline" size="sm" href={MAPS_URL} external>Ver no mapa</Button>
+            <div className="v" style={{ fontSize: 20 }}>{L.endereco}</div>
+            {L.horario && <p>{L.horario}</p>}
+            {L.mapsUrl && <Button variant="outline" size="sm" href={L.mapsUrl} external>Ver no mapa</Button>}
           </div>
         </Stagger>
       </section>

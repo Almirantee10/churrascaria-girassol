@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Check, Copy, MapPin, X } from "lucide-react";
-import { ADDRESS, MAPS_URL, PAGES, fmt, waUrl, WA_LABEL } from "@/lib/data";
+import { PAGES, fmt, waUrl } from "@/lib/data";
+import { useCatalog } from "./Catalog";
 import { gsap, useGSAP, noMotion } from "@/lib/gsap";
 import { useStore } from "./Store";
 import { Logo, WhatsAppIcon } from "./Brand";
@@ -15,6 +16,7 @@ import { ScrollBar } from "./Motion";
 export function Header() {
   const path = usePathname();
   const { cart } = useStore();
+  const { cat } = useCatalog();
   const ref = useRef<HTMLElement>(null);
   const badge = useRef<HTMLSpanElement>(null);
   const count = cart.length;
@@ -45,7 +47,7 @@ export function Header() {
   return (
     <header className="header" ref={ref}>
       <div className="header-in">
-        <Link href="/" aria-label="Churrascaria Girassol — início"><Logo height={46} /></Link>
+        <Link href="/" aria-label={cat.loja.nome + " — início"}><Logo height={46} /></Link>
         <nav className="nav">
           {PAGES.map((p) => {
             const on = p.href === "/" ? path === "/" : path.startsWith(p.href);
@@ -64,6 +66,8 @@ export function Header() {
 
 /* ------------------------------------------------------------------ Footer */
 export function Footer() {
+  const { cat } = useCatalog();
+  const L = cat.loja;
   return (
     <footer className="footer">
       <div className="footer-in">
@@ -72,9 +76,11 @@ export function Footer() {
           {PAGES.map((p) => <Link key={p.href} href={p.href}>{p.label}</Link>)}
         </div>
         <div className="footer-info">
-          <a href={MAPS_URL} target="_blank" rel="noopener noreferrer"><MapPin size={15} /> {ADDRESS}</a>
-          <a href={waUrl("Olá! Gostaria de fazer um pedido.")} target="_blank" rel="noopener noreferrer"><WhatsAppIcon size={15} /> {WA_LABEL}</a>
-          <div className="footer-tag">Sabor caseiro em cada refeição!</div>
+          {L.endereco && <a href={L.mapsUrl || undefined} target="_blank" rel="noopener noreferrer"><MapPin size={15} /> {L.endereco}</a>}
+          <a href={waUrl(L.whatsapp, "Olá! Gostaria de fazer um pedido.")} target="_blank" rel="noopener noreferrer"><WhatsAppIcon size={15} /> {L.telefone}</a>
+          {L.horario && <span style={{ font: "400 13px/1.3 var(--font-body)", color: "var(--text-muted)" }}>{L.horario}</span>}
+          <div className="footer-tag">{L.slogan}</div>
+          <Link href="/admin" className="restrita">Área Restrita</Link>
         </div>
       </div>
     </footer>
@@ -84,8 +90,8 @@ export function Footer() {
 /* --------------------------------------------------------------- Cart bar */
 export function CartBar() {
   const path = usePathname();
-  const { cart, total, sent } = useStore();
-  const show = cart.length > 0 && path !== "/carrinho" && path !== "/cardapio" && !sent;
+  const { cart, subtotal, sent } = useStore();
+  const show = cart.length > 0 && path !== "/carrinho" && path !== "/cardapio" && !path.startsWith("/admin") && !sent;
   const ref = useRef<HTMLDivElement>(null);
   useGSAP(() => {
     if (!show || noMotion()) return;
@@ -101,7 +107,7 @@ export function CartBar() {
             <BagIcon size={20} />
             <span className="cartbar-row">
               <span>Ver pedido · {cart.length} {cart.length === 1 ? "item" : "itens"}</span>
-              <span>{fmt(total)}</span>
+              <span>{fmt(subtotal)}</span>
             </span>
           </Link>
         </div>
@@ -178,6 +184,8 @@ function BottomSheet({ title, onClose, children }: { title: string; onClose: () 
 /* -------------------------------------------------------------- SentSheet */
 export function SentSheet() {
   const { sent, setSent, showToast } = useStore();
+  const { cat } = useCatalog();
+  const L = cat.loja;
   if (!sent) return null;
   const copy = async () => {
     try { await navigator.clipboard.writeText(sent); }
@@ -185,13 +193,13 @@ export function SentSheet() {
       const ta = document.createElement("textarea"); ta.value = sent; ta.style.position = "fixed"; ta.style.opacity = "0";
       document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch {} ta.remove();
     }
-    showToast(`Mensagem copiada! Cole no WhatsApp ${WA_LABEL}.`);
+    showToast(`Mensagem copiada! Cole no WhatsApp ${L.telefone}.`);
   };
   return (
-    <BottomSheet title="Pedido pronto" onClose={() => setSent(null)}>
-      <p className="sheet-p">Confira seu pedido e toque em <b>Abrir WhatsApp</b>. Se o WhatsApp não abrir, copie a mensagem e envie para {WA_LABEL}.</p>
+    <BottomSheet title="Pedido registrado!" onClose={() => setSent(null)}>
+      <p className="sheet-p">Confira seu pedido e toque em <b>Abrir WhatsApp</b>. Seu pedido já foi registrado. Se o WhatsApp não abrir, copie a mensagem e envie para {L.telefone}.</p>
       <pre className="sent-pre">{sent}</pre>
-      <a className="btn btn-whatsapp btn-lg btn-full" href={waUrl(sent)} target="_blank" rel="noopener noreferrer"><WhatsAppIcon size={22} /> <span>Abrir WhatsApp</span></a>
+      <a className="btn btn-whatsapp btn-lg btn-full" href={waUrl(L.whatsapp, sent)} target="_blank" rel="noopener noreferrer"><WhatsAppIcon size={22} /> <span>Abrir WhatsApp</span></a>
       <Button variant="outline" size="lg" full onClick={copy}><Copy size={18} /> <span>Copiar mensagem</span></Button>
     </BottomSheet>
   );
@@ -239,4 +247,17 @@ export function Balloons() {
     return () => window.removeEventListener("sds:burst", fire);
   }, []);
   return <div ref={layer} aria-hidden className="balloons" />;
+}
+
+/* ------------------------------------------------------------ StoreBanner */
+/** Faixa de aviso: loja fechada (destaque) e aviso geral do administrador. */
+export function StoreBanner() {
+  const { cat } = useCatalog();
+  const L = cat.loja;
+  if (L.aberta && !L.aviso) return null;
+  return (
+    <div className={"store-banner " + (L.aberta ? "info" : "closed")} role="status">
+      {L.aberta ? <span>{L.aviso}</span> : <span><b>🔴 Loja fechada.</b> {L.mensagemFechada}{L.horario ? " · " + L.horario : ""}</span>}
+    </div>
+  );
 }
